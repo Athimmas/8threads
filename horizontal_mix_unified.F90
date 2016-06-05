@@ -472,17 +472,13 @@
    RY_UNIFIED       = c0
    RZ_SAVE_UNIFIED  = c0
 
-    print *,nx_block_unified,ny_block_unified 
+    print *,nx_block_unified,ny_block_unified,nblocks_clinic 
 
     do iblock = 1,nblocks_clinic
        this_block = get_block(blocks_clinic(iblock),iblock)
        call merger( HMXL(:,:,iblock), HMXL_UNIFIED(:,:,1), iblock, this_block)
        call merger( KPP_HBLT(:,:,iblock), KPP_HBLT_UNIFIED(:,:,1), iblock, this_block)
        call merger( HXY(:,:,iblock), HXY_UNIFIED(:,:,1) , iblock, this_block)
-    enddo
-
-   do iblock = 1,nblocks_clinic  
-       this_block = get_block(blocks_clinic(iblock),iblock) 
        call merger( HYX(:,:,iblock), HYX_UNIFIED(:,:,1) , iblock, this_block)   
     enddo
   
@@ -593,6 +589,8 @@
   allocate (VDC_GM_UNIFIED(nx_block_unified,ny_block_unified,km,1))
   
   allocate (RBR_UNIFIED (nx_block_unified,ny_block_unified,1))
+
+  allocate (BL_DEPTH_UNIFIED(nx_block_unified,ny_block_unified,1))
 
   endif
 
@@ -2293,7 +2291,7 @@
 
              kid = kk + kk_sub - 2
 
-             !$OMP PARALLEL DO DEFAULT(SHARED)PRIVATE(j,i,dzw_unified,dz_bottom,zt_unified)NUM_THREADS(60)
+             !$OMP PARALLEL DO DEFAULT(SHARED)PRIVATE(j,i,dz_bottom,zt_unified)NUM_THREADS(60)
              do j=1,ny_block_unified
                    do i=1,nx_block_unified
 
@@ -3164,7 +3162,7 @@
 
    WORK1 = WORK2
 
-   do j=2,ny_block-1
+   do j=2,ny_block_unified-1
      do i=2,nx_block_unified-1
        if ( KMT_UNIFIED(i,j,bid) /= 0 ) then
          cw = p125
@@ -3467,6 +3465,7 @@
               enddo  
 
       enddo
+
 
 #ifdef CCSMCOUPLED
 #ifndef _HIRES
@@ -4323,7 +4322,7 @@
 
          block_row = int( my_grid_blockno/4)
 
-         block_col = mod(my_grid_blockno,2)
+         block_col = mod(my_grid_blockno,4)
 
          i_start = block_col * (nx_block - 4) + 1 + 2
 
@@ -4341,33 +4340,33 @@
 
          je = this_block%je
 
-         !if(block_row == 0 ) then
+         if(block_row == 0 ) then
 
-         !j_start = 1
-         !jb = 1 
+         j_start = 1
+         jb = 1 
 
-         !endif
+         endif
 
-         !if(block_row == 3 ) then
+         if(block_row == 1 ) then
 
-         !j_start = j_start
-         !je = this_block%je + 2
+         j_start = j_start
+         je = this_block%je + 2
 
-         !endif
+         endif
  
-         !if(block_col == 0 ) then
+         if(block_col == 0 ) then
 
-         !i_start = 1
-         !ib = 1  
+         i_start = 1
+         ib = 1  
 
-         !endif 
+         endif 
 
-         !if(block_col == 3 ) then
+         if(block_col == 3 ) then
 
-         !i_start = i_start
-         !ie = this_block%ie + 2
+         i_start = i_start
+         ie = this_block%ie + 2
 
-         !endif      
+         endif      
 
             j_index = j_start
              do j=jb,je
@@ -4428,7 +4427,7 @@
 
          block_row = int( my_grid_blockno /4)
 
-         block_col = mod(my_grid_blockno,2)
+         block_col = mod(my_grid_blockno,4)
 
          i_start = block_col * (nx_block - 4) + 1
 
@@ -4492,7 +4491,7 @@
 
          block_row = int(my_grid_blockno/4)
 
-         block_col = mod(my_grid_blockno,2)
+         block_col = mod(my_grid_blockno,4)
 
          i_start = block_col * (nx_block - 4) + 1 + 2
 
@@ -4598,7 +4597,7 @@
 
          block_row = int( my_grid_blockno/4)
 
-         block_col = mod(my_grid_blockno,2)
+         block_col = mod(my_grid_blockno,4)
 
          i_start = block_col * (nx_block - 4) + 1
 

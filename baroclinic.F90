@@ -583,6 +583,20 @@
 !
 !-----------------------------------------------------------------------
 
+  if(nsteps_run > 1) then
+
+    !dir$ offload_wait target(mic:0)wait(off_sig)
+     do iblock = 1,nblocks_clinic
+      this_block = get_block(blocks_clinic(iblock),iblock)
+       do k=1,km
+        do n=1,nt
+          call splitter(WORKN_HOST(:,:,n,k,iblock) , WORKN_PHI(:,:,n,k,1),iblock,this_block)
+       enddo
+      enddo
+     enddo
+  endif
+
+
      !$OMP PARALLEL DO PRIVATE(iblock)
      do iblock = 1,nblocks_clinic
       this_block = get_block(blocks_clinic(iblock),iblock)
@@ -601,22 +615,6 @@
           call merger(VVEL(:,:,k,curtime,iblock) , VCUR_UNIFIED(:,:,k,1) ,iblock ,this_block)
        enddo
       enddo
-
-
-   if(nsteps_run > 1) then
-
-    !dir$ offload_wait target(mic:0)wait(off_sig)
-     do iblock = 1,nblocks_clinic
-      this_block = get_block(blocks_clinic(iblock),iblock)
-       do k=1,km
-        do n=1,nt   
-          call splitter(WORKN_HOST(:,:,n,k,iblock) , WORKN_PHI(:,:,n,k,1) ,iblock,this_block)
-       enddo
-      enddo
-     enddo
-
-
-   endif
 
 
    do iblock = 1,nblocks_clinic
@@ -2244,7 +2242,7 @@
 
          block_row = int(my_grid_blockno/4)
 
-         block_col = mod(my_grid_blockno,2)
+         block_col = mod(my_grid_blockno,4)
 
          i_start = block_col * (nx_block - 4) + 1 + 2
 
@@ -2348,9 +2346,9 @@
 
          my_grid_blockno = iblock - 1
 
-         block_row = int( my_grid_blockno/4)
+         block_row = int(my_grid_blockno/4)
 
-         block_col = mod(my_grid_blockno,2)
+         block_col = mod(my_grid_blockno,4)
 
          i_start = block_col * (nx_block - 4) + 1
 
